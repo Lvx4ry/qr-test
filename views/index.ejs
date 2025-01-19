@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QR Scanner</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        margin: 0;
+        padding: 0;
+      }
+      #reader {
+        width: 60%;
+        max-width: 400px;
+        margin: 20px auto;
+      }
+      #success-indicator {
+        display: none;
+        margin-top: 20px;
+        color: white;
+        background-color: green;
+        padding: 10px;
+        border-radius: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>QR Scanner</h1>
+    <p>Asegúrate de permitir el acceso a tu cámara</p>
+    <div id="reader"></div>
+    <div id="success-indicator">QR leído correctamente</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode/minified/html5-qrcode.min.js"></script>
+    <script>
+      const successIndicator = document.getElementById("success-indicator");
+
+      // Función que se llama al leer el QR correctamente
+      async function onScanSuccess(decodedText, decodedResult) {
+        console.log(`Código QR leído: ${decodedText}`);
+
+        // Mostrar indicador de éxito
+        successIndicator.style.display = "block";
+
+        // Enviar POST con el contenido del QR
+        try {
+          const response = await fetch("http://localhost:4000/post", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ qrData: decodedText }),
+          });
+          console.log("POST enviado con éxito:", await response.json());
+        } catch (error) {
+          console.error("Error al enviar el POST:", error);
+        }
+
+        // Ocultar indicador después de 3 segundos
+        setTimeout(() => {
+          successIndicator.style.display = "none";
+        }, 3000);
+      }
+
+      // Inicializar el escáner de QR
+      const html5QrCode = new Html5Qrcode("reader");
+
+      html5QrCode
+        .start(
+          { facingMode: "environment" }, // Cámara trasera
+          {
+            fps: 10, // Cuadros por segundo
+            qrbox: { width: 250, height: 250 }, // Tamaño del área de escaneo
+          },
+          onScanSuccess,
+          (errorMessage) => {
+            console.warn(`Error de escaneo: ${errorMessage}`);
+          }
+        )
+        .catch((err) => {
+          console.error("Error al iniciar el escaneo:", err);
+        });
+    </script>
+  </body>
+</html>
