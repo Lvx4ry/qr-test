@@ -1,18 +1,19 @@
 import express from "express";
-
+import { productsRouter } from "./routers/products.router.js";
 const app = express();
 app.set("views", "./views");
 app.set("view engine", "ejs");
 
 app.use(express.json());
 
-app.get("/", (req, res) => {
-  res.render("index.ejs");
-});
+app.use("/products", productsRouter);
 
-app.post("/post", (req, res) => {
-  console.log(req.body);
-  res.send("Post request received");
+app.get("/", async (req, res) => {
+  try {
+    res.render("index.ejs");
+  } catch (err) {
+    console.log(err);
+  }
 });
 
 const PORT = process.env.PORT || 4000;

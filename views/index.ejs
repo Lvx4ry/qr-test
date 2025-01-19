@@ -12,8 +12,8 @@
         padding: 0;
       }
       #reader {
-        width: 60%;
-        max-width: 400px;
+        width: 40%;
+        max-width: 200px;
         margin: 20px auto;
       }
       #success-indicator {
@@ -45,10 +45,12 @@
 
         // Enviar POST con el contenido del QR
         try {
-          const response = await fetch("http://localhost:4000/post", {
+          const cleanedData = decodedText.replace(/[\r\n]/g, "").trim();
+
+          const response = await fetch("http://localhost:4000/products", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ qrData: decodedText }),
+            body: JSON.stringify({ qrCode: decodedText }),
           });
           console.log("POST enviado con éxito:", await response.json());
         } catch (error) {
@@ -58,7 +60,7 @@
         // Ocultar indicador después de 3 segundos
         setTimeout(() => {
           successIndicator.style.display = "none";
-        }, 3000);
+        }, 8000);
       }
 
       // Inicializar el escáner de QR
@@ -72,9 +74,7 @@
             qrbox: { width: 250, height: 250 }, // Tamaño del área de escaneo
           },
           onScanSuccess,
-          (errorMessage) => {
-            console.warn(`Error de escaneo: ${errorMessage}`);
-          }
+          (errorMessage) => {}
         )
         .catch((err) => {
           console.error("Error al iniciar el escaneo:", err);
