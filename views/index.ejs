@@ -38,19 +38,16 @@
 
       // Función que se llama al leer el QR correctamente
       async function onScanSuccess(decodedText, decodedResult) {
-        console.log(`Código QR leído: ${decodedText}`);
-
+        html5QrCode.stop(); // Detener el escáner
         // Mostrar indicador de éxito
         successIndicator.style.display = "block";
 
         // Enviar POST con el contenido del QR
         try {
-          const cleanedData = decodedText.replace(/[\r\n]/g, "").trim();
-
           const response = await fetch("http://localhost:4000/products", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ qrCode: decodedText }),
+            body: decodedText,
           });
           console.log("POST enviado con éxito:", await response.json());
         } catch (error) {
@@ -60,7 +57,20 @@
         // Ocultar indicador después de 3 segundos
         setTimeout(() => {
           successIndicator.style.display = "none";
-        }, 8000);
+          html5QrCode
+            .start(
+              { facingMode: "environment" }, // Cámara trasera
+              {
+                fps: 10, // Cuadros por segundo
+                qrbox: { width: 250, height: 250 }, // Tamaño del área de escaneo
+              },
+              onScanSuccess,
+              (errorMessage) => {}
+            )
+            .catch((err) => {
+              console.error("Error al iniciar el escaneo:", err);
+            });
+        }, 3000);
       }
 
       // Inicializar el escáner de QR
